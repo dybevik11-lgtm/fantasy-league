@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>My Team</h1>
+<ul id="team"></ul>
+
+<button onclick="sim()">Sim Game</button>
+<div id="result"></div>
+
+<script>
+const user=new URLSearchParams(location.search).get("u");
+
+fetch("/team/"+user)
+.then(r=>r.json())
+.then(data=>{
+  let list=document.getElementById("team");
+  data.forEach(p=>{
+    let li=document.createElement("li");
+    li.innerText=p.player;
+    list.appendChild(li);
+  });
+});
+
+function sim(){
+  fetch("/sim",{method:"POST"})
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById("result").innerText=
+      d.scoreA+" - "+d.scoreB;
+  });
+}
+</script>
+
+</body>
+</html>
