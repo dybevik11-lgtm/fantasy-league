@@ -1,0 +1,101 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+}
+
+/* Centered containers */
+.container, .box {
+  max-width: 700px;
+  margin: 30px auto;
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* Headings */
+h1, h2, h3 {
+  text-align: center;
+  margin-top: 10px;
+  color: #f8fafc;
+}
+
+/* Buttons */
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #38bdf8;
+  color: black;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #0ea5e9;
+  transform: scale(1.03);
+}
+
+/* Inputs */
+input, select {
+  width: 90%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+/* Lists */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  background: #334155;
+  margin: 8px 0;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Status / highlights */
+.status {
+  text-align: center;
+  font-size: 18px;
+  color: #facc15;
+  margin-bottom: 10px;
+}
+
+/* Win / loss colors */
+.win {
+  color: #22c55e;
+  font-weight: bold;
+}
+
+.lose {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* Log box (season page) */
+.log {
+  background: #0b1220;
+  padding: 10px;
+  border-radius: 10px;
+  height: 250px;
+  overflow-y: auto;
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+/* Layout helpers */
+.center {
+  text-align: center;
+}
