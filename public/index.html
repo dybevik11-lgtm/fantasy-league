@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fantasy League Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: auto;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: none;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #38bdf8;
+      color: black;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🏆 Fantasy League Hub</h1>
+
+  <div class="card">
+    <h2>Enter Your Username</h2>
+
+    <input id="username" placeholder="e.g. Beck">
+
+    <button onclick="enter()">Enter Draft</button>
+  </div>
+
+  <script>
+    function enter() {
+      const name = document.getElementById("username").value;
+
+      if (!name) {
+        alert("Enter a username");
+        return;
+      }
+
+      window.location.href = "draft.html?user=" + encodeURIComponent(name);
+    }
+  </script>
+
+</body>
+</html>
