@@ -1,0 +1,8 @@
+[
+  { "name": "Connor McDavid", "position": "C", "rating": 97 },
+  { "name": "Nathan MacKinnon", "position": "C", "rating": 95 },
+  { "name": "Auston Matthews", "position": "C", "rating": 95 },
+  { "name": "Cale Makar", "position": "D", "rating": 96 },
+  { "name": "Leon Draisaitl", "position": "C", "rating": 95 },
+  { "name": "Kirill Kaprizov", "position": "LW", "rating": 94 }
+]
