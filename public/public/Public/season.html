@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Season Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #38bdf8;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    .log {
+      text-align: left;
+      margin-top: 15px;
+      background: #334155;
+      padding: 10px;
+      border-radius: 8px;
+      height: 250px;
+      overflow-y: auto;
+    }
+
+    .win { color: #22c55e; }
+    .lose { color: #ef4444; }
+  </style>
+</head>
+
+<body>
+
+  <h1>🏆 Season Simulator</h1>
+
+  <div class="box">
+
+    <h3>Controls</h3>
+
+    <button onclick="simulateGame()">Sim Game</button>
+    <button onclick="simulateSeason()">Sim 10 Games</button>
+
+    <div class="log" id="log"></div>
+
+  </div>
+
+  <script>
+    const log = document.getElementById("log");
+
+    function addLog(text, type="") {
+      const div = document.createElement("div");
+      div.className = type;
+      div.innerText = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function simulateGame() {
+      const res = await fetch("/simulate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          teamA: "User1",
+          teamB: "User2"
+        })
+      });
+
+      const data = await res.json();
+
+      const result =
+        `Game Result → ${data.scoreA} - ${data.scoreB}`;
+
+      addLog(result);
+    }
+
+    async function simulateSeason() {
+      addLog("Starting Season...");
+
+      let wins = 0;
+      let losses = 0;
+
+      for (let i = 1; i <= 10; i++) {
+        const res = await fetch("/simulate", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            teamA: "User1",
+            teamB: "User2"
+          })
+        });
+
+        const data = await res.json();
+
+        const win = data.scoreA > data.scoreB;
+
+        if (win) {
+          wins++;
+          addLog(`Week ${i}: WIN (${data.scoreA}-${data.scoreB})`, "win");
+        } else {
+          losses++;
+          addLog(`Week ${i}: LOSS (${data.scoreA}-${data.scoreB})`, "lose");
+        }
+      }
+
+      addLog(`Season Finished → ${wins}W - ${losses}L`);
+    }
+  </script>
+
+</body>
+</html>
