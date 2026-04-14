@@ -15,7 +15,13 @@ const db = new sqlite3.Database("./database.db");
 /* ---------------- DATABASE ---------------- */
 
 db.serialize(() => {
-  db.run(`
+  db.run(
+  "INSERT INTO roster (teamId, playerId) VALUES (?, ?)",
+  [username, playerId],
+  (err) => {
+    if (err) console.log("Draft error:", err);
+  }
+);
     CREATE TABLE IF NOT EXISTS players (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
