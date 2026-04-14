@@ -1,0 +1,144 @@
+const express = require("express");
+const http = require("http");
+const sqlite3 = require("sqlite3").verbose();
+const { Server } = require("socket.io");
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+app.use(express.json());
+app.use(express.static("public"));
+
+const db = new sqlite3.Database("./database.db");
+
+/* ---------------- DATABASE ---------------- */
+
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS players (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      sport TEXT,
+      position TEXT,
+      team TEXT,
+      offense INTEGER,
+      defense INTEGER,
+      playmaking INTEGER
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS roster (
+      teamId TEXT,
+      playerId INTEGER,
+      line TEXT
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS trades (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      fromUser TEXT,
+      toUser TEXT,
+      offer TEXT,
+      request TEXT,
+      status TEXT DEFAULT 'pending'
+    )
+  `);
+});
+
+/* ---------------- MULTIPLAYER DRAFT ---------------- */
+
+let rooms = {};
+
+io.on("connection", (socket) => {
+  socket.on("join", ({ room, username }) => {
+    socket.join(room);
+
+    if (!rooms[room]) {
+      rooms[room] = { players: [], turn: 0 };
+    }
+
+    rooms[room].players.push({ id: socket.id, username });
+
+    io.to(room).emit("update", rooms[room]);
+  });
+
+  socket.on("draft", ({ room, playerId, username }) => {
+    const r = rooms[room];
+    if (!r) return;
+
+    if (r.players[r.turn]?.id !== socket.id) return;
+
+    db.run(
+      "INSERT INTO roster (teamId, playerId) VALUES (?, ?)",
+      [username, playerId]
+    );
+
+    r.turn = (r.turn + 1) % r.players.length;
+
+    io.to(room).emit("drafted", { playerId, turn: r.turn });
+  });
+});
+
+/* ---------------- GAME SIMULATION ---------------- */
+
+function getStats(team) {
+  return {
+    offense: team.reduce((s, p) => s + p.offense, 0),
+    defense: team.reduce((s, p) => s + p.defense, 0),
+    playmaking: team.reduce((s, p) => s + p.playmaking, 0)
+  };
+}
+
+function simulateGame(teamA, teamB) {
+  const a = getStats(teamA);
+  const b = getStats(teamB);
+
+  let scoreA = 0;
+  let scoreB = 0;
+
+  for (let i = 0; i < 100; i++) {
+    if (a.offense + Math.random() * a.playmaking >
+        b.defense + Math.random() * b.playmaking) {
+      scoreA += Math.random() > 0.5 ? 2 : 3;
+    }
+
+    if (b.offense + Math.random() * b.playmaking >
+        a.defense + Math.random() * a.playmaking) {
+      scoreB += Math.random() > 0.5 ? 2 : 3;
+    }
+  }
+
+  return { scoreA, scoreB };
+}
+
+/* ---------------- SIM ROUTE ---------------- */
+
+app.post("/simulate", (req, res) => {
+  const { teamA, teamB } = req.body;
+
+  db.all(
+    `SELECT p.* FROM roster r JOIN players p ON r.playerId = p.id WHERE r.teamId = ?`,
+    [teamA],
+    (err, A) => {
+      db.all(
+        `SELECT p.* FROM roster r JOIN players p ON r.playerId = p.id WHERE r.teamId = ?`,
+        [teamB],
+        (err, B) => {
+          const result = simulateGame(A, B);
+          res.json(result);
+        }
+      );
+    }
+  );
+});
+
+/* ---------------- START SERVER ---------------- */
+
+const PORT = process.env.PORT || 3000;
+
+server.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
