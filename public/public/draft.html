@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Fantasy Draft</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #334155;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    button {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #38bdf8;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #0ea5e9;
+    }
+
+    .status {
+      margin: 10px 0;
+      font-size: 18px;
+      color: #facc15;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🏒 Live Fantasy Draft</h1>
+
+  <div class="box">
+
+    <div class="status" id="status">Connecting...</div>
+
+    <h3>Players</h3>
+    <ul id="players"></ul>
+
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get("user") || "Guest";
+    const room = "main";
+
+    socket.emit("join", { room, username });
+
+    const status = document.getElementById("status");
+
+    socket.on("update", (data) => {
+      status.innerText = "Turn: " + data.players[data.turn]?.username;
+    });
+
+    socket.on("drafted", () => {
+      loadPlayers();
+    });
+
+    async function loadPlayers() {
+      const res = await fetch("/players/Hockey");
+      const players = await res.json();
+
+      const list = document.getElementById("players");
+      list.innerHTML = "";
+
+      players.forEach(p => {
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+          <span>${p.name}</span>
+          <button onclick="draft(${p.id})">Draft</button>
+        `;
+
+        list.appendChild(li);
+      });
+    }
+
+    function draft(id) {
+      socket.emit("draft", {
+        room,
+        playerId: id,
+        username
+      });
+    }
+
+    loadPlayers();
+  </script>
+
+</body>
+</html>
